@@ -1,0 +1,17 @@
+{
+    "contents" : "%\\VignetteIndexEntry{DEGreport}\n%\\VignetteDepends{}\n%\\VignetteKeywords{DifferentialExpression, Visualization, RNASeq, ReportWriting}\n%\\VignetteEngine{knitr::knitr}\n\\documentclass{article}\n\n<<style, eval=TRUE, echo=FALSE, results=\"asis\">>=\nBiocStyle::latex()\n@\n\n\\title{DEGreport }\n\\author{Lorena Pantano}\n\\date{Modified: 19 May, 2014. Compiled: \\today}\n\n\\begin{document}\n\n\\maketitle\n\n\n\n<<package-load,message=FALSE>>=\nlibrary(DEGreport)\ndata(humanSexDEedgeR)\nlibrary(edgeR)\n@\n\n\nWe are going to do a differential expression analysis with edgeR. We have an \nobject that is comming from the edgeR package. It countains a gene count matrix\nfor 85 TSI HapMap individuals, and the gender information. With that, we are \ngoing to apply the `glmFit` function to get genes differentially expressed \nbetween males and females.\n\n<<CHUNK1>>=\ndes<-humanSexDEedgeR$design\nfit <- glmFit(humanSexDEedgeR,des)\nlrt <- glmLRT(fit)\ntab<-cbind(lrt$table,p.adjust(lrt$table$PValue,method=\"BH\"))\ndetags <- rownames(tab[tab[,5]<=0.1,])\nplotSmear(humanSexDEedgeR, de.tags=detags)\n@\n\nWe need to extract the design data.frame where the condition is Male or Female.\n\n<<chunk-2>>=\ncounts<-cpm(humanSexDEedgeR,log=FALSE)\ng1<-colnames(counts)[1:41]\ng2<-colnames(counts)[42:85]\ndesign<-data.frame(condition=sub(\"1\",\"Male\",sub(\"0\",\"Female\",des[,2])))\n@\n\nWe are getting the chromosome information for each gene. This way we can colour\ngenes according autosomic,x or y chromosomes.\n\n<<chunk-3>>=\nlibrary(biomaRt)\nmart = useMart(\"ensembl\", dataset=\"hsapiens_gene_ensembl\")\ng = getGene( id = detags, type = \"ensembl_gene_id\", mart = mart)\ncolors=data.frame(genes=g$ensembl_gene_id,colors=sub(\"[1-9]{1,2}\",\"Autosomic\",g$chromosome_name))\n@\n\nCreate the report. The main parameters are the name columns in group1, and \ngroup2. Then, the count matrix, gene names that are DE, p-values, fold changes \nand path to create the report. As optional, you can give colours for each gene, \nand the population size used for permutation.\n\n<<chunk-4>>=\n#run comment the las code to create the html\ndetag10<-detags[1:10]\npval<-tab[,4]\nfc<-tab[detag10,1]\n#uncomment this to create the file\n#pathreport<-\"~/report\"\n#createReport(g1,g2,counts,detag10,pval,fc,pathreport,colors,pop=400)\n@\n\nRun this if you want to visualize your expression values by condition\n\n<<chunk-5, eval=FALSE>>=\ndegObj(counts,design,\"~/crickhome/temp/degObj.rda\")\nlibrary(shiny)\nrunGist(9930881)\n@\n\nYou can use individual functions, like degRank or degMean. This will create \nspecific figures and tables showed in the report.\n<<CHNK-6>>=\ndegMean(pval,counts)\ndegVar(pval,counts)\ndegMV(g1,g2,pval,counts)\ndegMB(detags,g1,g2,counts)\ndegVB(detags,g1,g2,counts)\nrank<-degRank(g1,g2,counts[detag10,],fc,400)\ndegPR(rank)\n@\n\n\\end{document}",
+    "created" : 1400522312892.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "3815990031",
+    "id" : "FDA904D3",
+    "lastKnownWriteTime" : 1400455481,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "sweave"
+}

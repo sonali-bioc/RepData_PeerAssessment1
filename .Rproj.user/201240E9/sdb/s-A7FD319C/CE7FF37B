@@ -1,0 +1,17 @@
+{
+    "contents" : "rm(list=ls())\n\n#load the data\ndata <- read.csv(unz(description=file.path(getwd(),\"activity.zip\"),\n                        filename=\"activity.csv\"), header=TRUE,sep=\",\")\n\n# get rid of missing values to make plots\ntempdata <- data[complete.cases(data),]\n\n##work out the total number of steps for each day (and the sum is not normally zero) \n##do the histogram of that set and calculate the mean and median.\n\n\nsp <- split(tempdata,as.factor(tempdata$date))\nres <- sapply(sp, function(x){\n    sum(x$steps)\n})\n\nhist(res)\nmean(res)\nmedian(res)\n\nsp2<- split(data,as.factor(data$interval))\navgsteps <- sapply(sp2, function(x){\n    mean(x$steps,na.rm=TRUE)\n})\navgstepsdf<- data.frame(interval=names(avgsteps), avgsteps=avgsteps)\n\n\n\nwith(avgstepsdf,\n    plot(interval,avgsteps,type=\"l\",xlab=\"5 minute interval\",\n         ylab=\"average no of steps averaged across all days\", col=\"blue\")\n)\n\navgstepsdf[which(avgstepsdf$avgsteps==max(avgstepsdf$avgsteps)),]\n\n\n\nnadata <- data[!complete.cases(data),]\nfor (i in 1:nrow(nadata)){\n    int <- nadata$interval[i]\n    print(int)\n    print(avgstepsdf[which(avgstepsdf==int),]$avgsteps)\n    nadata$steps[i] <- avgstepsdf[which(avgstepsdf==int),]$avgsteps\n}\n\nnadata$steps <- apply(nadata, 1, function(x){\n    int <- as.numeric(x[\"interval\"])\n    avgstepsdf[match(int,avgstepsdf$interval),\"avgsteps\"]\n})\n\n\n",
+    "created" : 1400282886794.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4090795546",
+    "id" : "CE7FF37B",
+    "lastKnownWriteTime" : 1400455969,
+    "path" : "~/GitHub/RepData_PeerAssessment1/test.R",
+    "project_path" : "test.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
